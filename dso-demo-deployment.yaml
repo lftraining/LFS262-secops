@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: dso-demo
+  name: dso-demo
+  annotations: 
+    seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dso-demo
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: dso-demo
+    spec:
+      automountServiceAccountToken: false
+      serviceAccountName: dso-demo
+      containers:
+      - image: gouravshah/dso-demo
+        name: dso-demo
+        ports:
+        - containerPort: 8080
+        securityContext:
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 11000
+          readOnlyRootFilesystem: true
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "128Mi"
+          limits:
+            cpu: "250m"
+            memory: "256Mi"  
+        volumeMounts:
+          - name: tmp
+            mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
